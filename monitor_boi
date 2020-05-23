@@ -5,7 +5,7 @@ curr_intern_res=$(xrandr -q|perl -F'\s|,' -lane "/^Sc/&&print join '',@F[8..10]"
 
 printf "external: $extern; internal: $intern\n"
 
-printf "Enter Mode: mirror, only-external, extended\n"
+printf "Enter Mode: mirror, only-external, only-internal, extended\n"
 read MODE
 
 printf "Set custom resolution for external monitor? (yes/no)\n"
@@ -20,23 +20,26 @@ case $CUSTOM_RES in
                                 echo $RES
                                 xrandr --output $extern --mode $RES --scale-from $curr_intern_res --output $intern --mode $curr_intern_res
                                 ;;
-                esac
 
-                case $MODE in
                         only-external)
                                 printf "Please specify custom resolution widthxheigth\n"
                                 read RES
                                 echo $RES
                                 xrandr --output $intern --off --output $extern --mode $RES
                                 ;;
-                esac
 
-                case $MODE in
                         extended)
                                 printf "Please specify custom resolution widthxheigth\n"
                                 read RES
                                 echo $RES
                                 xrandr --output $intern --auto --output $extern --right-of $intern --mode $RES
+                                ;;
+
+                        only-internal)
+                                printf "Please specify custom resolution widthxheigth\n"
+                                read RES
+                                echo $RES
+                                xrandr --output $extern --off --output $intern --mode $RES
                                 ;;
                 esac
 
@@ -45,21 +48,21 @@ case $CUSTOM_RES in
         no)
                 case $MODE in
                         mirror)
-                                xrandr --output $extern --auto --scale-from $curr_intern_res --output $extern \
-                                        --output $intern --mode $curr_intern_res
+                                xrandr --output $extern --auto --scale-from $curr_intern_res --output $extern --output $intern --mode $curr_intern_res
                                 ;;
-                esac
 
-                case $MODE in
                         only-external)
                                 xrandr --output $intern --off --output $extern --auto
                                 ;;
-                esac
 
-                case $MODE in
                         extended)
                                 xrandr --output $intern --auto --output $extern --right-of $intern --auto
                                 ;;
+
+                        only-internal)
+                                xrandr --output $extern --off --output $intern --auto
+                                ;;
+
                 esac
 
                 ;;
