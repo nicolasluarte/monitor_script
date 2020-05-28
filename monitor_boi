@@ -1,6 +1,15 @@
 #!/bin/bash
-intern=$(xrandr | grep -w primary | awk '{print $1}')
-extern=$(xrandr | grep -w connected | grep -wv primary | awk '{print $1}')
+
+# set primary and seconday device
+intern=$(xrandr -q |
+        grep -wo ".* connected" |
+        awk '{print $1}' |
+        dmenu -p "Set primary monitor")
+extern=$(xrandr -q |
+        grep -wo ".* connected" |
+        awk '{print $1}' |
+        dmenu -p "Set secondary monitor")
+
 curr_intern_res=$(xrandr -q|perl -F'\s|,' -lane "/^Sc/&&print join '',@F[8..10]")
 
 printf "external: $extern; internal: $intern\n"
