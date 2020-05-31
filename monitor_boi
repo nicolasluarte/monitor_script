@@ -4,29 +4,40 @@
 intern=$(xrandr -q |
         grep -wo ".* connected" |
         awk '{print $1}' |
-        dmenu -p "Set primary monitor")
+        dmenu -p "Set primary monitor" -i -fn "Droid Sans Mono-9")
 extern=$(xrandr -q |
         grep -wo ".* connected" |
         awk '{print $1}' |
-        dmenu -p "Set secondary monitor")
+        dmenu -p "Set secondary monitor" -i -fn "Droid Sans Mono-9")
 
 curr_intern_res=$(xrandr -q|perl -F'\s|,' -lane "/^Sc/&&print join '',@F[8..10]")
 
-printf "external: $extern; internal: $intern\n"
+# set the mode
+MODE=$(echo -e "mirror\nonly-external\nonly-internal\nextended" |
+        dmenu -p "Enter Mode: " -i -fn "Droid Sans Mono-9")
 
-printf "Enter Mode: mirror, only-external, only-internal, extended\n"
-read MODE
+# if external monitor is going to be used ask for its resolution
+if [[ $MODE == "mirror" || \
+        $MODE == "only-external" || \
+        $MODE == "extended" ]]
+then
+        CUSTOM_RES=$(echo -e "yes\nno" |
+        dmenu -p "Set custom resolution?: " -i -fn "Droid Sans Mono-9")
+        else
+                CUSTOM_RES="no"
+fi
 
-printf "Set custom resolution for external monitor? (yes/no)\n"
-read CUSTOM_RES
-
+# evaluate all the cases
 case $CUSTOM_RES in
         yes)
                 case $MODE in
                         mirror)
-                                printf "Please specify custom resolution widthxheigth\n"
-                                read RES
-                                echo $RES
+                                RES=$(xrandr -q |
+                                        sed -n "/$extern/,/[A-Z]-[0-9]/p" |
+                                        head -n -1 |
+                                        tail -n +2 |
+                                        awk '{print $1}' |
+                                        dmenu -p "Select resolution: " -i -fn "Droid Sans Mono-9")
                                 xrandr --output $extern --mode $RES --scale-from $curr_intern_res --output $intern --mode $curr_intern_res
                                 ;;
 
